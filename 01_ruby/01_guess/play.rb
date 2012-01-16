@@ -8,10 +8,11 @@ status =
   Open3.popen3("ruby guess.rb #{limit}") do |child_stdin, child_stdout, child_stderr, wait_thr|
     puts ">>> pid        : #{ wait_thr.pid }"       # report the child pid for informational purposes
   
-    finished = false                                # we're just getting started!
+    finished = false                                # we're just getting started!								
     i = (limit/2).floor                        		# let's start with a guess in the middle
+    prevResponse = nil								# create a variable to capture the previous response
 
-    until finished #|| (i > limit)                   # keep looping until we're done
+    until finished || (i > limit)  || (i < 1)   	# keep looping until we're done
       inline = child_stdout.readline.strip          # get input from the game process
 
       unless inline.match(/GUESS/)                  # make sure the game is asking what we expect
@@ -26,10 +27,20 @@ status =
       puts "< " + response                          # report the result
       finished = response.match(/:exiting/)         # if the response includes ':exiting', we're done
 
-      if(response.match(/low/))
+      if(response.match(/low$/))
+      	if(prevResponse == :high)					# if the  previous response was high, guess.rb is cheating
+      		puts "> Hey, you're cheating!"			
+      		exit									# call him out and exit
+  		end
       	i += 1										# if the guess is too low, increase it
-  	  elsif(response.match(/high/))
+      	prevResponse = :low
+  	  elsif(response.match(/high$/))
+  	  	if(prevResponse == :low)					# if the previous response was low, guess.rb is cheating
+      		puts "> Hey, you're cheating!"
+      		exit									# call him out and exit
+  		end
   		i -= 1										# if the response is too high, decrease it
+  		prevResponse = :high
   	  end
   		
   		
