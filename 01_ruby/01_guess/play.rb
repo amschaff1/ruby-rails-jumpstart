@@ -9,9 +9,9 @@ status =
     puts ">>> pid        : #{ wait_thr.pid }"       # report the child pid for informational purposes
   
     finished = false                                # we're just getting started!
-    i = 1                                           # let's start with a simple guess
+    i = (limit/2).floor                        		# let's start with a guess in the middle
 
-    until finished || (i > limit)                   # keep looping until we're done
+    until finished #|| (i > limit)                   # keep looping until we're done
       inline = child_stdout.readline.strip          # get input from the game process
 
       unless inline.match(/GUESS/)                  # make sure the game is asking what we expect
@@ -26,7 +26,13 @@ status =
       puts "< " + response                          # report the result
       finished = response.match(/:exiting/)         # if the response includes ':exiting', we're done
 
-      i += 1
+      if(response.match(/low/))
+      	i += 1										# if the guess is too low, increase it
+  	  elsif(response.match(/high/))
+  		i -= 1										# if the response is too high, decrease it
+  	  end
+  		
+  		
     end
     puts ">>> exitstatus : #{ wait_thr.value }"
   end
