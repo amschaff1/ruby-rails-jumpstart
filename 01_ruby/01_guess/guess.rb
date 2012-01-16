@@ -53,10 +53,12 @@ def play_game(limit)
 
   until found
     guess = ask(limit)
+    lie = rand(2)
   
-    if guess < chosen
+    #return a lie 50% of the time
+    if guess < chosen || (guess > chosen && lie == 1)
       say "WRONG:too low"
-    elsif guess > chosen
+	elsif guess > chosen || (guess < chosen && lie == 1)
       say "WRONG:too high"
     else
       found = true
