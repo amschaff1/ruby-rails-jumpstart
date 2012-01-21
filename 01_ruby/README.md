@@ -16,6 +16,10 @@
 * Step 4 : (medium) start reading Poignant guide to ruby: http://mislav.uniqpath.com/poignant-guide/book/
 * Step 5 : (long) start reading Programming Ruby (ebook): http://pragprog.com/book/ruby3/programming-ruby-1-9
 
+Additional resources:
+
+* https://github.com/ryanb/ruby-warrior
+
 # Git fluency
 
 * Do GitHub Bootcamp at : http://help.github.com/

@@ -1,6 +1,19 @@
 
 # Building Proficiency in Web Programming using Sinatra
 
+# Gems you'll need for this section (gem install thegem):
+
+* rack
+* rails
+* sinatra
+* sinatra-respond_to
+* padrino
+* json
+* supermodel
+* roxml
+* haml
+* pusher
+
 # Using Chrome Developer Tools
 
 * Step 1: (quick) Watch http://www.youtube.com/watch?v=nOEw9iiopwI
@@ -43,6 +56,7 @@ Diving Deeper
 * Step 1: (quick) Read http://rubydoc.info/gems/activemodel/3.1.3/frames
 * Step 2: (quick) Read https://github.com/maccman/supermodel/
 * Step 3: (medium) Learn https://github.com/maccman/supermodel/blob/master/lib/supermodel/base.rb
+* Step 4: (medium) Read about validations in Rails http://guides.rubyonrails.org/active_record_validations_callbacks.html
 
 Diving Deeper
 
