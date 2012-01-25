@@ -24,14 +24,14 @@ object = open(query_url) do |v|                                     # call the r
 end
 
 puts " ======================================== "                   # fancy output
-puts "   #{object['query']}"
-puts "     #{object['refresh_url']}"
+puts "   #{object['query']}"																	# print the query 
+puts "     #{object['refresh_url']}"													# print the refresh url
 puts " ---------------------------------------- "
 
 object['results'].each do |rt|                                # processing sub-elements
   puts
-  puts "   * #{rt['text']}"
-  puts "     #{rt['from_user']}"
+  puts "   * #{rt['text']}"																		# print the tweet's text
+  puts "     #{rt['from_user']}"															# print the username the tweet was from
 end
 
 puts                                                                # fancy output
