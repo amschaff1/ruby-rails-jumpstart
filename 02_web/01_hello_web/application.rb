@@ -61,30 +61,45 @@ class ExampleServer < Sinatra::Base
     params[:message]
   end
 
-  # FIXME #1: implement reverse service that reverses the message
+  # outputs a message from the url in reverse as plain text,
+  # a la: http://localhost:4567/reverse/foo
+  #
   get '/reverse/:message' do
     content_type 'text/plain', :charset => 'utf-8'
-    params[:message]
+    params[:message].to_s.reverse
   end
 
-  # FIXME #1: implement reverse service that reverses the message
+  # outputs a message from the url parameter in reverse as plain text,
+  # a la: http://localhost:4567/reverse?message=foo
   get '/reverse' do
     content_type 'text/plain', :charset => 'utf-8'
-    params[:message]
+    params[:message].reverse
   end
 
-  # FIXME #2: implement pig latin service that translates the message
-  # using the pig latin algorithm
+	# outputs a message from the url in reverse as plain text,
+	# a la: http://localhost:4567/piglatin/foo
   get '/piglatin/:message' do
     content_type 'text/plain', :charset => 'utf-8'
-    params[:message]
+    words = params[:message].split(" ")
+    newWords = []
+    words.each do |word|
+    	newWords.push(word[1..-1] + word[0])
+  	end
+  	
+  	newWords.join(" ")
   end
 
-  # FIXME #2: implement pig latin service that translates the message
-  # using the pig latin algorithm
+  # outputs a message from the url parameter in reverse as plain text,
+	# a la: http://localhost:4567/piglatin?message=foo
   get '/piglatin' do
     content_type 'text/plain', :charset => 'utf-8'
-    params[:message]
+    words = params[:message].split(" ")
+    newWords = []
+    words.each do |word|
+    	newWords.push(word[1..-1] + word[0])
+  	end
+  	
+  	newWords.join(" ")
   end
 
   # FIXME #3: implement snowball stemming service that translates the
@@ -98,7 +113,7 @@ class ExampleServer < Sinatra::Base
   # FIXME #3: implement snowball stemming service that translates the
   # message into a comma-separated list of tokens using the snowball
   # stemming algorithm
-  get '/piglatin' do
+  get '/snowball' do
     content_type 'text/plain', :charset => 'utf-8'
     params[:message]
   end
