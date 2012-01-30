@@ -12,7 +12,6 @@ require 'json'
 class Inventor < SuperModel::Base
 	include SuperModel::RandomID
 	attributes :name
-	has_many :ideas
 end
 
 class Idea < SuperModel::Base
@@ -39,6 +38,11 @@ class RestfulServer < Sinatra::Base
   def list_ideas
     json_out(Idea.all)
   end
+  
+  # obtain a list of all inventors
+  def list_inventors
+  	json_out(Inventor.all)
+	end
 
   # display the list of ideas
   get '/' do
@@ -49,14 +53,21 @@ class RestfulServer < Sinatra::Base
   get '/ideas' do
     list_ideas
   end
+  
+  # displays the list of inventors
+  get '/inventors' do 
+  	list_inventors
+	end
 
   # create a new idea
   post '/ideas' do
     idea = Idea.create!(JSON.parse(request.body.read))
-    unless idea.inventor
+    if idea.has_attribute?("inventor")
+    	idea.inventor.save
+  	else
     	idea.inventor = INVENTOR
-    	idea.save
   	end
+  	idea.save
     json_out(idea)
   end
 
@@ -69,6 +80,16 @@ class RestfulServer < Sinatra::Base
 
     json_out(Idea.find(params[:id]))
   end
+  
+  #get an inventor by id
+  get '/inventors/:id' do
+  	unless Inventor.exists?(params[:id])
+  		not_found
+  		return
+		end
+		
+		json_out(Inventor.find(params[:id]))
+	end
 
   # update an idea
   put '/ideas/:id' do
@@ -93,6 +114,18 @@ class RestfulServer < Sinatra::Base
     status 204
     "idea #{params[:id]} deleted\n"
   end
+  
+  # delete an inventor
+  delete '/inventors/:id' do
+  	unless Inventor.exists?(params[:id])
+  		not_found
+  		return	
+		end
+		
+		Inventor.find(params[:id]).destroy
+		status 204
+		"inventor #{params[:id]} deleted\n"
+	end
 
   run! if app_file == $0
   
