@@ -9,11 +9,20 @@ require 'json'
 # For documentation, see:
 #   https://github.com/maccman/supermodel/blob/master/lib/supermodel/base.rb
 #
+class Inventor < SuperModel::Base
+	include SuperModel::RandomID
+	attributes :name
+	has_many :ideas
+end
+
 class Idea < SuperModel::Base
   include SuperModel::RandomID
+  belongs_to :inventor
 end
 
 class RestfulServer < Sinatra::Base
+	INVENTOR = Inventor.create!( :name => "ANONYMOUS" )
+	
   # helper method that returns json
   def json_out(data)
     content_type 'application/json', :charset => 'utf-8'
@@ -44,6 +53,10 @@ class RestfulServer < Sinatra::Base
   # create a new idea
   post '/ideas' do
     idea = Idea.create!(JSON.parse(request.body.read))
+    unless idea.inventor
+    	idea.inventor = INVENTOR
+    	idea.save
+  	end
     json_out(idea)
   end
 
@@ -82,4 +95,5 @@ class RestfulServer < Sinatra::Base
   end
 
   run! if app_file == $0
+  
 end
