@@ -18,6 +18,8 @@ end
 class Idea < SuperModel::Base
   include SuperModel::RandomID
   belongs_to :inventor
+  validates_presence_of :category
+  validates_presence_of :text
 end
 
 class RestfulServer < Sinatra::Base
@@ -84,6 +86,13 @@ class RestfulServer < Sinatra::Base
   post '/ideas' do
   	json_map = JSON.parse(request.body.read)
   	inventor_in = json_map['inventor']
+  	category_in = json_map['category']
+  	text_in = json_map['text']
+		
+  	if category_in.nil? || text_in.nil?
+  		status 400
+  		return body "Idea does not contain a catetory and/or text"
+		end
   	
   	if inventor_in && inventor_in.has_key?("id")
   		status 400 
