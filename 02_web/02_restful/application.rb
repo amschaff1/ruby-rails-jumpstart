@@ -59,17 +59,50 @@ class RestfulServer < Sinatra::Base
   get '/inventors' do 
   	list_inventors
 	end
+	
+	# nuke wihtout password -- deny
+	post '/nuke' do
+		status 400
+		body "password required to delete inventors and ideas\n"
+	end
+	
+	# destroy all ideas and inventors in the system
+	post '/nuke/:password' do
+		if params[:password] == "yesireallymeanit"
+			Inventor.destroy_all
+			Idea.destroy_all
+			
+			status 204
+			"all inventors and ideas deleted\n"
+		else 
+			status 400
+			body "password invalid"
+		end
+	end
 
   # create a new idea
   post '/ideas' do
-    idea = Idea.create!(JSON.parse(request.body.read))
-    if idea.has_attribute?("inventor")
-    	idea.inventor.save
-  	else
-    	idea.inventor = INVENTOR
-  	end
+  	json_map = JSON.parse(request.body.read)
+  	inventor_in = json_map['inventor']
+  	
+  	if inventor_in && inventor_in.has_key?("id")
+  		status 400 
+  		return body "cannot assign id\n"
+		elsif inventor_in && inventor_in.has_key?("name")
+			my_inventor = Inventor.find_by_attribute("name", inventor_in['name'])
+			if my_inventor.nil? 
+  			my_inventor = Inventor.create!( :name => inventor_in['name'] )
+			end
+		else
+			my_inventor = INVENTOR
+		end
+		
+		json_map.delete('inventor')
+		idea = Idea.new(json_map)
+  	idea.inventor = my_inventor
+
   	idea.save
-    json_out(idea)
+    json_out(json_map)
   end
 
   # get an idea by id
@@ -121,6 +154,12 @@ class RestfulServer < Sinatra::Base
   	unless Inventor.exists?(params[:id])
   		not_found
   		return	
+		end
+		
+		Idea.all.each do |idea|
+			if idea.inventor.id == params[:id]
+				idea.destroy
+			end
 		end
 		
 		Inventor.find(params[:id]).destroy
