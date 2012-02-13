@@ -1,6 +1,5 @@
 require 'open-uri'
 require 'json'
-require 'pp'
 
 query = ARGV.shift														# get query string from command line
 
