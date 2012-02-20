@@ -13,6 +13,7 @@ require 'json'
 class Inventor < SuperModel::Base
 	include SuperModel::RandomID
 	validates_presence_of :name
+	validates_inclusion_of :gender, :in => %w( m f ), :unless => Proc.new { |inventor| inventor.name == "ANONYMOUS" }
 end
 
 class Idea < SuperModel::Base
@@ -24,7 +25,7 @@ end
 
 class RestfulServer < Sinatra::Base
 	INVENTOR = Inventor.create!( :name => "ANONYMOUS" )
-	
+
   # helper method that returns json
   def json_out(data)
     content_type 'application/json', :charset => 'utf-8'
@@ -92,11 +93,12 @@ class RestfulServer < Sinatra::Base
 				begin
 					my_inventor = Inventor.find_by_attribute("name", inventor_in['name'])
 					if my_inventor.nil? 
-		  			my_inventor = Inventor.create!( :name => inventor_in['name'] )
+		  			my_inventor = Inventor.create!( :name => inventor_in['name'], :gender => inventor_in['gender'] )
 					end
 				rescue Exception => e
-					status 400
-					return body "Inventor does not have name\n"
+					return body e.inspect + "\n"
+					#status 400
+					#return body "Inventor does not have name\n"
 				end
 			else
 				my_inventor = INVENTOR
@@ -110,9 +112,9 @@ class RestfulServer < Sinatra::Base
 	  	idea.save
 	    json_out(json_map)
     rescue Exception => e
-	  	#body e.inspect
+	  	#body e.inspect + "\n"
     	status 400
-  		body "Idea does not contain a category and/or text"
+  		body "Idea does not contain a category and/or text\n"
     end
 	    
   end
