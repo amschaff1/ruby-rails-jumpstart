@@ -106,8 +106,8 @@ class RestfulServer < Sinatra::Base
 				begin
 					my_inventor = Inventor.find_by_attribute("name", inventor_in['name'])
 					if my_inventor.nil? 
-						#inventor_in['name'] = PersonName.new(inventor_in['name'])
-		  			my_inventor = Inventor.create!( :name => inventor_in['name'], :gender => inventor_in['gender'] )
+						newName = PersonName.new(inventor_in['name'])
+		  			my_inventor = Inventor.create!( :name => inventor_in['name'], :firstName => newName.first, :lastName => newName.last, :gender => inventor_in['gender'] )
 					end
 				rescue Exception => e
 					return body e.inspect + "\n"
