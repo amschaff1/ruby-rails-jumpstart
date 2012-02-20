@@ -12,7 +12,7 @@ require 'json'
 #
 class Inventor < SuperModel::Base
 	include SuperModel::RandomID
-	attributes :name
+	validates_presence_of :name
 end
 
 class Idea < SuperModel::Base
@@ -86,32 +86,35 @@ class RestfulServer < Sinatra::Base
   post '/ideas' do
   	json_map = JSON.parse(request.body.read)
   	inventor_in = json_map['inventor']
-  	category_in = json_map['category']
-  	text_in = json_map['text']
 		
-  	if category_in.nil? || text_in.nil?
-  		status 400
-  		return body "Idea does not contain a catetory and/or text"
-		end
-  	
-  	if inventor_in && inventor_in.has_key?("id")
-  		status 400 
-  		return body "cannot assign id\n"
-		elsif inventor_in && inventor_in.has_key?("name")
-			my_inventor = Inventor.find_by_attribute("name", inventor_in['name'])
-			if my_inventor.nil? 
-  			my_inventor = Inventor.create!( :name => inventor_in['name'] )
+  	begin
+			if inventor_in
+				begin
+					my_inventor = Inventor.find_by_attribute("name", inventor_in['name'])
+					if my_inventor.nil? 
+		  			my_inventor = Inventor.create!( :name => inventor_in['name'] )
+					end
+				rescue Exception => e
+					status 400
+					return body "Inventor does not have name\n"
+				end
+			else
+				my_inventor = INVENTOR
 			end
-		else
-			my_inventor = INVENTOR
-		end
 		
-		json_map.delete('inventor')
-		idea = Idea.new(json_map)
-  	idea.inventor = my_inventor
 
-  	idea.save
-    json_out(json_map)
+			json_map.delete('inventor')
+			idea = Idea.new(json_map)
+	  	idea.inventor = my_inventor
+	
+	  	idea.save
+	    json_out(json_map)
+    rescue Exception => e
+	  	#body e.inspect
+    	status 400
+  		body "Idea does not contain a category and/or text"
+    end
+	    
   end
 
   # get an idea by id
