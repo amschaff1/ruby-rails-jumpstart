@@ -5,6 +5,9 @@ require 'sinatra'
 require 'sinatra/base'
 require 'supermodel'
 require 'json'
+require 'people_places_things'
+
+include PeoplePlacesThings
 
 #
 # For documentation, see:
@@ -12,7 +15,7 @@ require 'json'
 #
 class Inventor < SuperModel::Base
 	include SuperModel::RandomID
-	validates_presence_of :name
+	validates_uniqueness_of :name, :scope => :id
 	validates_inclusion_of :gender, :in => %w( m f ), :unless => Proc.new { |inventor| inventor.name == "ANONYMOUS" }
 end
 
@@ -89,16 +92,27 @@ class RestfulServer < Sinatra::Base
   	inventor_in = json_map['inventor']
 		
   	begin
-			if inventor_in
+			if inventor_in && inventor_in['id']
+				if Inventor.exists?(inventor_in['id'])
+					my_inventor = Inventor.find(inventor_in['id'])
+				elsif Inventor.find_by_attribute("name", inventor_in['name']).nil?
+					my_inventor = Inventor.create( :id => inventor_in['id'], :name => inventor_in['name'], :gender => inventor_in['gender'] )
+				else
+					status 400
+					return body "Choose a unique name\n"
+				end
+			elsif
+				inventor_in
 				begin
 					my_inventor = Inventor.find_by_attribute("name", inventor_in['name'])
 					if my_inventor.nil? 
+						#inventor_in['name'] = PersonName.new(inventor_in['name'])
 		  			my_inventor = Inventor.create!( :name => inventor_in['name'], :gender => inventor_in['gender'] )
 					end
 				rescue Exception => e
 					return body e.inspect + "\n"
-					#status 400
-					#return body "Inventor does not have name\n"
+					status 400
+					return body "Inventor does not have name or gender is incorrect (m/f)\n"
 				end
 			else
 				my_inventor = INVENTOR
@@ -112,9 +126,9 @@ class RestfulServer < Sinatra::Base
 	  	idea.save
 	    json_out(json_map)
     rescue Exception => e
-	  	#body e.inspect + "\n"
-    	status 400
-  		body "Idea does not contain a category and/or text\n"
+	  	body e.inspect + "\n"
+    	#status 400
+  		#body "Idea does not contain a category and/or text\n"
     end
 	    
   end
