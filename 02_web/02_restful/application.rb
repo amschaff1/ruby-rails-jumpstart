@@ -1,4 +1,4 @@
-
+require 'open-uri'
 require 'bundler/setup'
 require 'rubygems'
 require 'sinatra'
@@ -13,10 +13,31 @@ include PeoplePlacesThings
 # For documentation, see:
 #   https://github.com/maccman/supermodel/blob/master/lib/supermodel/base.rb
 #
+
+class GenderValidator < ActiveModel::Validator
+	def validate(record)
+		@base_url = "https://www.rapleaf.com/developers/try_name_to_gender?query="     # remote API url
+		query = record.name                                       # query string
+		query_url = @base_url + URI.escape(query)
+		
+		object = open(query_url, :ssl_verify_mode => OpenSSL::SSL::VERIFY_NONE) do |v|                                     # call the remote API
+	  	input = v.read                                                    # read the full response                                                      # un-comment this to see the returned JSON magic
+	  	JSON.parse(input)
+	  end
+	  
+	  unless "#{object['status']}" == "NOT FOUND" 
+	  	if "#{object['likelihood']}".to_f >= 0.8 && record.gender != "#{object['gender']}"
+	  		record.errors[:base] << "Gender is not correct"
+	  	end
+  	end
+	end
+end
+
 class Inventor < SuperModel::Base
 	include SuperModel::RandomID
+
 	validates_uniqueness_of :name, :scope => :id
-	validates_inclusion_of :gender, :in => %w( m f ), :unless => Proc.new { |inventor| inventor.name == "ANONYMOUS" }
+	validates_with GenderValidator, :fields=>[:gender]
 end
 
 class Idea < SuperModel::Base
@@ -27,7 +48,7 @@ class Idea < SuperModel::Base
 end
 
 class RestfulServer < Sinatra::Base
-	INVENTOR = Inventor.create!( :name => "ANONYMOUS" )
+	INVENTOR = Inventor.create( :name => "ANONYMOUS", :gender => "Male" )
 
   # helper method that returns json
   def json_out(data)
