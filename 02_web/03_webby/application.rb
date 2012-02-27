@@ -47,6 +47,11 @@ class Webby < Sinatra::Base
   get '/' do
     haml :'index', :layout => :application
   end
+  
+  # --- Core Web Application : about ---
+  get '/about' do
+  	haml :'about', :layout => :application
+	end
 
   # --- Core Web Application : locations ---
   get '/locations/?' do

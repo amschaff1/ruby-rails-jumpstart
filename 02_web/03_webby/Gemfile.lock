@@ -75,6 +75,7 @@ GEM
 
 PLATFORMS
   ruby
+  x86-mingw32
 
 DEPENDENCIES
   activemodel (= 3.1.3)
