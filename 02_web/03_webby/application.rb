@@ -8,6 +8,7 @@ require 'rack/csrf'
 require 'rack/methodoverride'
 require 'supermodel'
 require 'haml'
+require 'open-uri'
 require 'json'
 
 # ----------------------------------------------------
@@ -15,7 +16,16 @@ require 'json'
 # ----------------------------------------------------
 class Location < SuperModel::Base
   include SuperModel::RandomID
-  attributes :name, :lat, :lon
+  #attributes :name, :lat, :lon
+  validates_presence_of :name
+  validates :lat, :presence=>true, :numericality => true
+  validates :lon, :presence=>true, :numericality => true
+end
+
+class DuckDuckGoQuery < SuperModel::Base
+	include SuperModel::RandomID
+	#attributes :name, :text
+	validates_presence_of :name, :text
 end
 
 # ----------------------------------------------------
@@ -76,8 +86,14 @@ class Webby < Sinatra::Base
   end
 
   post '/locations/?' do
-    @location = Location.create!(params[:location])
-    redirect to('/locations/' + @location.id)
+    @location = Location.new(params[:location])
+    if @location.valid?
+    	@location.save
+  		redirect to('/locations/' + @location.id)
+		else
+			status 400
+    	raise 'The location is not valid'
+  	end
   end
 
   post '/locations/:id/update' do
@@ -91,9 +107,61 @@ class Webby < Sinatra::Base
     @location.destroy
     redirect to('/locations')
   end
-
+  
   # --- Core Web Application : duckduckgo queries ---
-  # TODO
+  get '/duckduckgo_queries/?' do
+    @queries = DuckDuckGoQuery.all
+    haml :'duckduckgo_queries/index', :layout => :application
+  end
+
+  get '/duckduckgo_queries/new' do
+    @query = DuckDuckGoQuery.new
+    haml :'duckduckgo_queries/edit', :layout => :application
+  end
+
+  get '/duckduckgo_queries/:id' do
+    @query = DuckDuckGoQuery.find(params[:id])
+    haml :'duckduckgo_queries/show', :layout => :application
+  end
+
+  get '/duckduckgo_queries/:id/edit' do
+    @query = DuckDuckGoQuery.find(params[:id])
+    @action   = "/duckduckgo_queries/#{params[:id]}/update"
+    haml :'duckduckgo_queries/edit', :layout => :application
+  end
+
+  post '/duckduckgo_queries/?' do
+    @query = DuckDuckGoQuery.new(params[:query])
+    
+    query_url = "http://api.duckduckgo.com/?format=json&pretty=1&q=" + URI.escape(@query.name)
+    object = open(query_url) do |v|
+    	input = v.read
+    	JSON.parse(input)
+  	end
+  	object['RelatedTopics'].each do |rt|
+  		@query.text += "#{rt['Text']}"
+		end
+    
+    if @query.valid?
+    	@query.save
+  		redirect to('/duckduckgo_queries/' + @queries.id)
+		else
+			status 400
+    	raise 'The location is not valid'
+  	end
+  end
+
+  post '/duckduckgo_queries/:id/update' do
+    @query = DuckDuckGoQuery.find(params[:id])
+    @query.update_attributes!(params[:query])
+    redirect to('/duckduckgo_queries/' + @queries.id)
+  end
+
+  post '/duckduckgo_queries/:id/delete' do
+    @query = DuckDuckGoQuery.find(params[:id])
+    @query.destroy
+    redirect to('/duckduckgo_queries')
+  end  
 
   # --- Core Web Application : twitter queries ---
   # TODO

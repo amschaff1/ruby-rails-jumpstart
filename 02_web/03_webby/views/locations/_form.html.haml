@@ -1,5 +1,6 @@
 
 - form_for @location, @action || "/locations", :method => :POST do |f|
+  = f.error_messages
   = csrf_tag
   %table{:align => :center}
     %tr

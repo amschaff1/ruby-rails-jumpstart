@@ -1,0 +1,15 @@
+
+- form_for @query, @action || "/duckduckgo_queries", :method => :POST do |f|
+  = f.error_messages
+  = csrf_tag
+  %table{:align => :center}
+    %tr
+      %td= f.label :name, :caption => "Query Name:"
+      %td= f.text_field :name
+
+    %tr
+      %td 
+      %td
+        = f.submit
+        = link_to 'Cancel', '/duckduckgo_queries'
+
