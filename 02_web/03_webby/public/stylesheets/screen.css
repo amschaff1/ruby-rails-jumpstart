@@ -62,6 +62,10 @@ a {
   opacity:0.6;
 }
 
+#floatleft {
+	text-align:left;
+}
+
 #map_canvas {
   position:relative; height:100%;
 }

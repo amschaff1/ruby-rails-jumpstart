@@ -1,16 +1,15 @@
-.container
-  #map_canvas
-
-#floater
-  %p
-    %b Name:
-    = @query.name
-
-  %p
-    %b Text:
-    = @query.text
-
-
-  = link_to 'Edit', "/duckduckgo_queries/#{@query.id}/edit"
-  %span &nbsp;
-  = link_to 'Back', "/duckduckgo_queries"
+.centerbox
+	#floatleft
+	
+		%p
+			%b Name:
+			= @query.name
+	
+		%p
+			%b Text:
+			= @query.text
+	
+	
+	= link_to 'Edit', "/duckduckgo_queries/#{@query.id}/edit"
+	%span &nbsp;
+	= link_to 'Back', "/duckduckgo_queries"

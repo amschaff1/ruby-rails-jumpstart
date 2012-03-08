@@ -22,7 +22,7 @@
         %td= link_to 'Show', "/duckduckgo_queries/#{query.id}"
         %td= link_to 'Edit', "/duckduckgo_queries/#{query.id}/edit"
         %td
-          - form_for location, "/duckduckgo_queries/#{query.id}/delete", :id => "delete_#{query.id}", :method => :POST do |f|
+          - form_for query, "/duckduckgo_queries/#{query.id}/delete", :id => "delete_#{query.id}", :method => :POST do |f|
             = csrf_tag
             = link_to 'Destroy', "javascript:$('#delete_#{query.id}').submit();", :confirm => "Are you sure?"
 

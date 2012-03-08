@@ -25,7 +25,7 @@ end
 class DuckDuckGoQuery < SuperModel::Base
 	include SuperModel::RandomID
 	#attributes :name, :text
-	validates_presence_of :name, :text
+	validates_presence_of :name
 end
 
 # ----------------------------------------------------
@@ -131,7 +131,8 @@ class Webby < Sinatra::Base
   end
 
   post '/duckduckgo_queries/?' do
-    @query = DuckDuckGoQuery.new(params[:query])
+    @query = DuckDuckGoQuery.new(params[:duck_duck_go_query])
+    @query.text = ""
     
     query_url = "http://api.duckduckgo.com/?format=json&pretty=1&q=" + URI.escape(@query.name)
     object = open(query_url) do |v|
@@ -144,7 +145,7 @@ class Webby < Sinatra::Base
     
     if @query.valid?
     	@query.save
-  		redirect to('/duckduckgo_queries/' + @queries.id)
+  		redirect to('/duckduckgo_queries/' + @query.id)
 		else
 			status 400
     	raise 'The location is not valid'
@@ -153,8 +154,8 @@ class Webby < Sinatra::Base
 
   post '/duckduckgo_queries/:id/update' do
     @query = DuckDuckGoQuery.find(params[:id])
-    @query.update_attributes!(params[:query])
-    redirect to('/duckduckgo_queries/' + @queries.id)
+    @query.update_attributes!(params[:duck_duck_go_query])
+    redirect to('/duckduckgo_queries/' + @query.id)
   end
 
   post '/duckduckgo_queries/:id/delete' do
