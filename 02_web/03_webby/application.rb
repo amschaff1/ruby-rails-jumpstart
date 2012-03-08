@@ -25,6 +25,7 @@ end
 class DuckDuckGoQuery < SuperModel::Base
 	include SuperModel::RandomID
 	#attributes :name, :text
+	attributes :name, :text
 	validates_presence_of :name
 end
 
@@ -134,21 +135,21 @@ class Webby < Sinatra::Base
     @query = DuckDuckGoQuery.new(params[:duck_duck_go_query])
     @query.text = ""
     
-    query_url = "http://api.duckduckgo.com/?format=json&pretty=1&q=" + URI.escape(@query.name)
-    object = open(query_url) do |v|
-    	input = v.read
-    	JSON.parse(input)
-  	end
-  	object['RelatedTopics'].each do |rt|
-  		@query.text += "#{rt['Text']}"
-		end
-    
     if @query.valid?
+	    query_url = "http://api.duckduckgo.com/?format=json&pretty=1&q=" + URI.escape(@query.name)
+	    object = open(query_url) do |v|
+	    	input = v.read
+	    	JSON.parse(input)
+	  	end
+	  	object['RelatedTopics'].each do |rt|
+	  		@query.text += "#{rt['Text']}"
+			end
+   
     	@query.save
   		redirect to('/duckduckgo_queries/' + @query.id)
 		else
 			status 400
-    	raise 'The location is not valid'
+    	raise 'The query is not valid'
   	end
   end
 
